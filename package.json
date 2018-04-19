@@ -1,7 +1,7 @@
 {
-  "name": "nodejs_mentoring",
+  "name": "node.js_homework_application",
   "version": "1.0.0",
-  "description": "mentoring application",
+  "description": "nodejs mentoring application",
   "main": "app.js",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "build": "babel src -d dist",
     "babel-node": "babel-node --presets=env",
     "start": "nodemon --exec npm run babel-node -- src/app.js",
-    "lint": "./node_modules/.bin/eslint app.js",
+    "lint": "./node_modules/.bin/eslint ./src",
     "test": "test"
   },
   "devDependencies": {

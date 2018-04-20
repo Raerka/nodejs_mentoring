@@ -14,8 +14,8 @@
   },
   "homepage": "https://github.com/Raerka/nodejs_mentoring#readme",
   "scripts": {
-    "build": "babel src -d dist",
-    "prestart": "npm run build",
+    "build": "babel src --out-dir dist --copy-files",
+    "prestart": "rimraf dist && npm run build",
     "start": "node dist/app.js",
     "watch": "nodemon --exec babel-node src/app.js",
     "lint": "eslint src",

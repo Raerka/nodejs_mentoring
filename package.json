@@ -15,8 +15,10 @@
   "homepage": "https://github.com/Raerka/nodejs_mentoring#readme",
   "scripts": {
     "build": "babel src -d dist",
-    "start": "nodemon --exec babel-node -- src/app.js",
-    "lint": "eslint ./src",
+    "prestart": "npm run build",
+    "start": "node dist/app.js",
+    "watch": "nodemon --exec babel-node src/app.js",
+    "lint": "eslint src",
     "test": "test"
   },
   "devDependencies": {

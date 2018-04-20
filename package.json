@@ -1,0 +1,32 @@
+{
+  "name": "node.js_homework_application",
+  "version": "1.0.0",
+  "description": "nodejs mentoring application",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raerka/nodejs_mentoring.git"
+  },
+  "author": "Andrei Kasmykou <andrei_kasmykou@epam.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raerka/nodejs_mentoring/issues"
+  },
+  "homepage": "https://github.com/Raerka/nodejs_mentoring#readme",
+  "scripts": {
+    "build": "babel src --out-dir dist --copy-files",
+    "prestart": "rimraf dist && npm run build",
+    "start": "node dist/app.js",
+    "watch": "nodemon --exec babel-node src/app.js",
+    "lint": "eslint src",
+    "test": "test"
+  },
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-stage-2": "6.24.1",
+    "babel-register": "6.26.0",
+    "eslint": "4.19.1",
+    "nodemon": "1.17.3"
+  }
+}

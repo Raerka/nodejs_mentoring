@@ -13,16 +13,10 @@
     "url": "https://github.com/Raerka/nodejs_mentoring/issues"
   },
   "homepage": "https://github.com/Raerka/nodejs_mentoring#readme",
-  "babel": {
-    "presets": [
-      "env"
-    ]
-  },
   "scripts": {
     "build": "babel src -d dist",
-    "babel-node": "babel-node --presets=env",
-    "start": "nodemon --exec npm run babel-node -- src/app.js",
-    "lint": "./node_modules/.bin/eslint ./src",
+    "start": "nodemon --exec babel-node -- src/app.js",
+    "lint": "eslint ./src",
     "test": "test"
   },
   "devDependencies": {

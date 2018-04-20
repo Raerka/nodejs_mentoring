@@ -1,6 +1,7 @@
 # Program Folders
 .idea/
 conditions/
+dist/
 
 # Dependency directories
 node_modules/

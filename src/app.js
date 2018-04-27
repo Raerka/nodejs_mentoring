@@ -17,6 +17,7 @@ const importer = new Importer();
 const directoryPath = `${__dirname.slice(0, -4)}src\\data`;
 const delay = 3000;
 
+//Log only first member of csv file for short
 try {
   //async loading
   dirWatcher.on('changed', (filePath) => {
@@ -29,12 +30,12 @@ try {
   
   //sync loading
   dirWatcher.on('changed', (filePath) => {
-    importer
-      .importSync(filePath);
+    console.log(importer            // eslint-disable-line no-console
+      .importSync(filePath)[0]);
   });
   
   dirWatcher.watch(directoryPath, delay);
-  
+
 } catch (error) {
   if (error instanceof WrongPathError) {
     console.log('Reading path failed', error); // eslint-disable-line no-console

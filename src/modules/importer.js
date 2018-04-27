@@ -14,6 +14,7 @@ export class Importer {
    * @description Importing CSV files, convert the data to JavaScript objects
    * @async
    * @param {string} path    file path for importing data
+   * @throws {ConversionError}
    * @return {Promise} return a promise with imported data from file at path.
    */
   import(path) {
@@ -21,7 +22,7 @@ export class Importer {
       const converter = new Converter({});
       converter.on('end_parsed', (jsonData) => {
         if(!jsonData){
-          rej('CSV to JSON conversion failed!');
+          rej(new ConversionError('CSV to JSON conversion failed!'));
         }
         res(jsonData);
       });
@@ -33,18 +34,31 @@ export class Importer {
    * @description Importing CSV files, convert the data to JavaScript objects, log data to console
    * @param {string} path   file path for importing data
    * @throws {ConversionError}
-   * @return void
+   * @return {Array} Array of json objects
    */
   importSync(path) {
     const csvString = fs.readFileSync(path).toString();
-    const converter = new Converter({});
-    converter
-      .fromString(csvString)
-      .on('end_parsed', (jsonData) => {
-        if(!jsonData){
-          throw new ConversionError('CSV to JSON conversion failed!');
-        }
-        console.log(jsonData[0]); // eslint-disable-line no-console
-      });
+    return Importer.csvToJsonConverter(csvString);
+  }
+  
+  /**
+   * @description Convert csv to json
+   * @static
+   * @param {string} csvString
+   * @return {Array} Array of json objects
+   */
+  static csvToJsonConverter(csvString) {
+    const result = [];
+    const lines = csvString.split('\n');
+    const headers = lines[0].split(',');
+    for (let i = 1; i < lines.length; i++) {
+      let obj = {};
+      let currentLine = lines[i].split(',');
+      for (let j = 0; j < headers.length; j++) {
+        obj[headers[j]] = currentLine[j];
+      }
+      result.push(obj);
+    }
+    return result;
   }
 }

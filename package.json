@@ -19,7 +19,8 @@
     "start": "node dist/app.js",
     "watch": "nodemon --exec babel-node src/app.js",
     "lint": "eslint src",
-    "test": "test"
+    "test": "test",
+    "stream": "node src/utils/streams.js"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
@@ -30,6 +31,10 @@
     "nodemon": "1.17.3"
   },
   "dependencies": {
-    "csvtojson": "1.1.9"
+    "commander": "2.15.1",
+    "csvtojson": "1.1.9",
+    "request": "2.85.0",
+    "split": "1.0.1",
+    "through2": "2.0.3"
   }
 }

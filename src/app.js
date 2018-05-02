@@ -1,5 +1,6 @@
 import config from './config';
 import { models } from './models';
+import path from 'path';
 
 import { DirWatcher } from './modules/dirwatcher';
 import { Importer } from './modules/importer';
@@ -14,8 +15,9 @@ new models.Product();
 const dirWatcher = new DirWatcher();
 const importer = new Importer();
 
-const directoryPath = `${__dirname.slice(0, -4)}src\\data`;
-const delay = 3000;
+const directoryPath = `${__dirname.slice(0, -4)}src${path.sep}data`;
+const delayForWatching = 3000;
+const delayForUnWatch = 50000;
 
 //Log only first member of csv file for short
 try {
@@ -34,7 +36,7 @@ try {
       .importSync(filePath)[0]);
   });
   
-  dirWatcher.watch(directoryPath, delay);
+  dirWatcher.watch(directoryPath, delayForWatching);
 
 } catch (error) {
   if (error instanceof WrongPathError) {
@@ -47,5 +49,7 @@ try {
   }
 }
 
-
-
+setTimeout(() => {
+  dirWatcher.unWatch();
+  console.log('DirWatcher was unwatched'); // eslint-disable-line no-console
+}, delayForUnWatch);

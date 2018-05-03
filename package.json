@@ -20,7 +20,9 @@
     "watch": "nodemon --exec babel-node src/app.js",
     "lint": "eslint src",
     "test": "test",
-    "stream": "node src/utils/streams.js"
+    
+    "prestream": "rimraf dist && npm run build",
+    "stream": "node dist/utils/streams.js"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

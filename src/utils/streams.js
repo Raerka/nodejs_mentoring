@@ -1,6 +1,33 @@
-console.log(process.env);
+//TODO How to export program module in the app.js???
 
-// inside streams.js
+import program from 'commander';
+import through from 'through2';
+
+program
+  .version('0.0.1')
+  .command('*')
+  .description('Catch all wrong input or command')
+  .action(() => {
+    console.log('Wrong input! Try again or use help (-h or --help)'); // eslint-disable-line no-console
+    process.exit();
+  });
+  
+program
+  .option('-a, --act <act>', 'Action name for running, first argument (io|transform|transform-file)')
+  .option('-f, --file [path]', 'Name of file, optional second argument')
+  .option('-p, --path [path]', 'Path to directory with css files for making bundle.css')
+  .on('--help', function () {
+    console.log('---Usage message for user---'); // eslint-disable-line no-console
+  })
+  .parse(process.argv);
+
+function hello() {
+  console.log('-----action-----', program.act);
+  console.log('-----file----', program.file);
+  console.log('-----path-----', program.path);
+}
+
+hello();
 
 function inputOutput(filePath) { /* ... */ }
 
@@ -58,7 +85,6 @@ A transform stream takes input data and applies an operation to the data to prod
 
 // Create a through stream with a 'write' and 'end' function:
 
-import through from 'through2';
 
 
 const stream = through(write, end);

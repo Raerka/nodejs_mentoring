@@ -1,51 +1,50 @@
-import config from './config';
-import { models } from './models';
+/* eslint-disable indent */
 
-import { DirWatcher } from './modules/dirwatcher';
-import { Importer } from './modules/importer';
-import { WrongPathError } from './errors/wrong-path-error';
-import { ConversionError } from './errors/conversion-error';
+import program from 'commander';
+import {
+  streamsProgram,
+  directFileToLog,
+  transformData,
+  transformCsvFileToJson,
+  transformCsvToJsonAndWriteToFile
+} from './utils/streams';
 
-console.log(config.name); // eslint-disable-line no-console
 
-new models.User();
-new models.Product();
+streamsProgram(program);
+program.parse(process.argv);
 
-const dirWatcher = new DirWatcher();
-const importer = new Importer();
+//Point 3
+const NO_COMMAND_SPECIFIED = process.argv.length === 2;
+if (NO_COMMAND_SPECIFIED) {
+  console.log('You have not passed any arguments'); // eslint-disable-line no-console
+  program.help();
+}
 
-const directoryPath = `${__dirname.slice(0, -4)}src\\data`;
-const delay = 3000;
-
-//Log only first member of csv file for short
-try {
-  //async loading
-  dirWatcher.on('changed', (filePath) => {
-    importer
-      .import(filePath)
-      .then((data) => {
-        console.log(data[0]); // eslint-disable-line no-console
-      });
-  });
-  
-  //sync loading
-  dirWatcher.on('changed', (filePath) => {
-    console.log(importer            // eslint-disable-line no-console
-      .importSync(filePath)[0]);
-  });
-  
-  dirWatcher.watch(directoryPath, delay);
-
-} catch (error) {
-  if (error instanceof WrongPathError) {
-    console.log('Reading path failed', error); // eslint-disable-line no-console
-  } else if (error instanceof ConversionError) {
-    console.log('Conversion of csv file was failed', error); // eslint-disable-line no-console
-  } else {
-    console.log('Unknown error', error); // eslint-disable-line no-console
-    throw error;
-  }
+switch (program.act) {
+  case 'io' :
+    directFileToLog(program.file); //Point 4
+    break;
+  case 'transform' :
+    transformData(); //Point 5
+    break;
+  case 'transform-file' :
+    transformCsvFileToJson(program.file); //Point 6
+    break;
+  case 'transform-file-write-to-json' :
+    transformCsvToJsonAndWriteToFile(program.file); //Point 7
+    break;
+  case 'bundle-css' :
+    console.log('Bundle css'); //Point 8
+    break;
+  default :
+    console.log('You have not passed any actions'); // eslint-disable-line no-console
+    program.help();
 }
 
 
-
+function hello() {
+  console.log('-----act-----', program.act);
+  console.log('-----file----', program.file);
+  console.log('-----path-----', program.path);
+  console.log('---program---', program);
+}

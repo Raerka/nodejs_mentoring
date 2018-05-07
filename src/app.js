@@ -6,9 +6,9 @@ import {
   directFileToLog,
   transformData,
   transformCsvFileToJson,
-  transformCsvToJsonAndWriteToFile
+  transformCsvToJsonAndWriteToFile,
+  makeCssBundle
 } from './utils/streams';
-
 
 streamsProgram(program);
 program.parse(process.argv);
@@ -34,17 +34,9 @@ switch (program.act) {
     transformCsvToJsonAndWriteToFile(program.file); //Point 7
     break;
   case 'bundle-css' :
-    console.log('Bundle css'); //Point 8
+    makeCssBundle(program.path); //Point 8
     break;
   default :
     console.log('You have not passed any actions'); // eslint-disable-line no-console
     program.help();
-}
-
-
-function hello() {
-  console.log('-----act-----', program.act);
-  console.log('-----file----', program.file);
-  console.log('-----path-----', program.path);
-  console.log('---program---', program);
 }

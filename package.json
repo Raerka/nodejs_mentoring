@@ -16,7 +16,7 @@
   "scripts": {
     "build": "babel src --out-dir dist --copy-files",
     "prestart": "rimraf dist && npm run build",
-    "start": "node dist/app.js",
+    "start": "node dist/http-servers/json-server.js",
     "watch": "nodemon --exec babel-node src/app.js",
     "lint": "eslint src",
     "test": "test"

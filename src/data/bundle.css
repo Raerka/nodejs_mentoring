@@ -1,0 +1,60 @@
+/*================= Buttons ====================*/
+
+.button {
+  margin: 2px;
+  padding: 6px 20px;
+  border: none;
+  border-radius: 3px;
+  font-size: 15px;
+  font-family: Roboto, sans-serif;
+}
+
+.disabled {
+   cursor: default;
+ }
+
+.focus {
+   box-shadow: none;
+   outline: none;
+}
+/*================= Text-box ====================*/
+
+.text-box {
+  border: 0;
+  height: 35px;
+}
+
+.focus {
+   box-shadow: none;
+}
+
+.disabled {
+   cursor: default;
+}
+/*================= Checkbox ====================*/
+
+.checkbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  margin: 5px;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.checked {
+   border-radius: 50%;
+ }
+
+.checked::after {
+   content: 'check';
+   position: absolute;
+   display: inline-block;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   text-align: center;
+ }

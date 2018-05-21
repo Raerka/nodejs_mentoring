@@ -13,15 +13,10 @@ import { WrongPathError } from '../errors/wrong-path-error';
 export const streamsProgram = (program) => {
   program
     .version('0.0.1')
-    .command('*')
-    .description('Catch all wrong input or command')
-    .action(() => {
-      console.log(`Unknown Command: ${program.args.join(' ')}`); // eslint-disable-line no-console
-      program.help();
-    });
+    .allowUnknownOption();
   
   program
-    .option('-a, --act <act>', 'Action name for running, first argument ' +
+    .option('-a, --action <act> [textToTransform...]', 'Action name for running, first argument ' +
       '(reverse|transform|outputFile|convertFromFile|convertToFile|bundle-css)')
     .option('-f, --file [path]', 'Name of file, optional second argument')
     .option('-p, --path [path]', 'Path to directory with css files for making bundle.css')
@@ -31,33 +26,40 @@ export const streamsProgram = (program) => {
 };
 
 //Main functions
-
 /**
  * @description Reverse string data from process.stdin to process.stdout
- * @param {string} str (data for reversing)    ?????????????????
+ * @param {string} str (first data for reversing)
  * @return void
  */
-export const reverse = () => {
-  const reverse = through((data, encoding, cb) => {
-    cb(null, new Buffer(data.toString().split('').reverse().join('')));
+export const reverse = (str) => {
+  process.stdin.on('readable', () => {
+    const chunk = process.stdin.read();
+    if (chunk !== null) {
+      process.stdout.write(chunk.toString().split('').reverse().join(''));
+    }
   });
-  process.stdin
-    .pipe(reverse)
-    .pipe(process.stdout);
+  process.stdin.on('end', () => {
+    process.stdout.write('end');
+  });
+  process.stdin.push(str);
 };
 
 /**
- * @description Convert data from process.stdin to upper-case data, using the through2 module, and pipe it to process.stdout.
- * @param {string} str  ?????????????????????????????????
+ * @description Convert data to upper-case from process.stdin to process.stdout.
+ * @param {string} str  (first data for transforming)
  * @return void
  */
-export const transform = () => {
-  const toUpperCase = through((data, encoding, cb) => {
-    cb(null, new Buffer(data.toString().toUpperCase()));
+export const transform = (str) => {
+  process.stdin.on('readable', () => {
+    const chunk = process.stdin.read();
+    if (chunk !== null) {
+      process.stdout.write(chunk.toString().toUpperCase());
+    }
   });
-  process.stdin
-    .pipe(toUpperCase)
-    .pipe(process.stdout);
+  process.stdin.on('end', () => {
+    process.stdout.write('end');
+  });
+  process.stdin.push(str);
 };
 
 /**
@@ -66,9 +68,10 @@ export const transform = () => {
  * @return void
  */
 export const outputFile = (filePath) => {
-  //todo Add checking filePath with stats
-  fs.createReadStream(filePath)
-    .pipe(process.stdout);
+  if (isFile(filePath)) {
+    fs.createReadStream(filePath)
+      .pipe(process.stdout);
+  }
 };
 
 /**
@@ -111,7 +114,7 @@ export const convertToFile = (filePath) => {
  *  1. Grab all css files in given path
  *  2. Contact them into one big css file
  *  3. Add contents of
- *  https://www.epam.com/etc/clientlibs/foundation/main.min.fc69c13add6eae57cd247a91c7e26a15.css
+ *  https://drive.google.com/uc?export=download&id=1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X
  *  at the bottom of this big css
  *  4. Output will be saved in the same path and called bundle.css
  * @param {string} directoryPath (extra parameter --path in CL)
@@ -119,24 +122,20 @@ export const convertToFile = (filePath) => {
  * @return void
  */
 export const makeCssBundle = (directoryPath) => {
-  //todo Add cheking directoryPath with stats
   if (isDirectory(directoryPath)) {
-    const URL = 'https://epa.ms/nodejs18-hw3-css';
+    const URL = 'https://drive.google.com/uc?export=download&id=1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X';
     const bundleName = 'bundle.css';
-    
-    console.log(request(URL));
-    
     const rs = new Readable();
     rs.push(null);
+
     rs
       .pipe(readDirectory(directoryPath))
-      // .pipe(request(URL))
+      .pipe(addDataFromUrl(URL))
       .pipe(fs.createWriteStream(`${directoryPath}${path.sep}${bundleName}`));
   }
 };
 
 //Additional functions
-
 /**
  * @description Return true if given filePath is File
  * @param {string} filePath
@@ -162,7 +161,6 @@ const isDirectory = (directoryPath) => {
   console.log(`Wrong directoryPath: ${directoryPath}`); // eslint-disable-line no-console
   program.help();
 };
-
 
 /**
  * @description Create Transform Stream for parsing csv file and getting json objects
@@ -213,28 +211,38 @@ const readDirectory = (directoryPath) => {
   let bundleData = '';
   return through(
     (data, enc, cb) => {
-      cb(null, null);
-    }, (cb) => {
-      fs.stat(directoryPath, (error, stats) => {
-        if (!stats.isDirectory()) {
-          throw new WrongPathError(`Given path ${directoryPath} is not a directory`);
-        }
+      cb(null, data);
+    },
+    (cb) => {
+      const extension = '.css';
+      fs.readdir(directoryPath, (error, files) => {
         if (error) {
-          throw new WrongPathError(`Can not read given path ${directoryPath}`);
+          throw new WrongPathError(`Can not read current path ${directoryPath}`);
         }
-        const extension = '.css';
-        fs.readdir(directoryPath, (error, files) => {
-          if (error) {
-            throw new WrongPathError(`Can not read current path ${directoryPath}`);
+        files.forEach((fileName) => {
+          if (fileName.endsWith(extension)) {
+            const filePath = `${directoryPath}${path.sep}${fileName}`;
+            bundleData += fs.readFileSync(filePath);
           }
-          files.forEach((fileName) => {
-            if (fileName.endsWith(extension)) {
-              const filePath = `${directoryPath}${path.sep}${fileName}`;
-              bundleData += fs.readFileSync(filePath);
-            }
-          });
-          cb(null, bundleData);
         });
+        cb(null, bundleData);
+      });
+    }
+  );
+};
+
+/**
+ * @description Create Transform Stream for reading given URL, collecting all data and joining it
+ * to the data from the stream which invoke this transformer
+ * @param {string} URL  (resource from which need add data)
+ * @return {Stream}
+ */
+const addDataFromUrl = (URL) => {
+  return through(
+    (data, enc, cb) => {
+      request(URL, (error, response, body) => {
+        data += body;
+        cb(null, data);
       });
     }
   );

@@ -29,28 +29,28 @@ if (NO_COMMAND_SPECIFIED) {
   program.help();
 }
 
-switch (program.act) {
+switch (program.action) {
   case 'reverse' :
-    reverse();
+    reverse(program.args.join(' ')); //Point 6a
     break;
   case 'transform' :
-    transform(); //Point 5
+    transform(program.args.join(' ')); //Point 6b
     break;
   case 'outputFile' :
     checkPath(program.file);
-    outputFile(program.file); //Point 4
+    outputFile(program.file); //Point 6c
     break;
   case 'convertFromFile' :
     checkPath(program.file);
-    convertFromFile(program.file); //Point 6
+    convertFromFile(program.file); //Point 6d
     break;
   case 'convertToFile' :
     checkPath(program.file);
-    convertToFile(program.file); //Point 7
+    convertToFile(program.file); //Point 6e
     break;
   case 'bundle-css' :
     checkPath(program.path);
-    makeCssBundle(program.path); //Point 8
+    makeCssBundle(program.path); //Point 7
     break;
   default :
     console.log('You have not passed any actions'); // eslint-disable-line no-console

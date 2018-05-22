@@ -7,7 +7,6 @@ export class DirWatcher extends EventEmitter{
   
   constructor() {
     super();
-    console.log('DirWatcher module'); // eslint-disable-line no-console
     this.filesPathsInDirectory = new Map();
   }
   
@@ -23,10 +22,13 @@ export class DirWatcher extends EventEmitter{
    */
   watch(path, delay) {
     fs.stat(path, (error, stats) => {
-      if (error || !stats.isDirectory()) {
+      if (!stats.isDirectory()) {
         throw new WrongPathError(`Given path ${path} is not a directory`);
       }
-      setInterval(() => {
+      if (error) {
+        throw new WrongPathError(`Can not read given path ${path}`);
+      }
+      this.interval = setInterval(() => {
         fs.readdir(path, (error, files) => {
           if (error) {
             throw new WrongPathError(`Can not read current path ${path}`);
@@ -97,5 +99,14 @@ export class DirWatcher extends EventEmitter{
         }
       }
     }
+  }
+  
+  /**
+   * @description Clear Interval which was set in watch() method
+   * @this {DirWatcher}
+   * @return void
+   */
+  unWatch() {
+    clearInterval(this.interval);
   }
 }

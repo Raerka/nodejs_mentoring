@@ -16,13 +16,20 @@ export const streamsProgram = (program) => {
     .allowUnknownOption();
   
   program
-    .option('-a, --action <act> [textToTransform...]', 'Action name for running, first argument ' +
+    .option('-a, --action <action> [textToTransform...]', 'Action name for running, first argument ' +
       '(reverse|transform|outputFile|convertFromFile|convertToFile|bundle-css)')
     .option('-f, --file [path]', 'Name of file, optional second argument')
     .option('-p, --path [path]', 'Path to directory with css files for making bundle.css')
     .on('--help', () => {
-      console.log('---Read help documentation and try again please---'); // eslint-disable-line no-console
+      customHelp();
+    })
+    .on('-h', () => {
+      customHelp();
     });
+};
+
+const customHelp = () => {
+  console.log('---Read help documentation and try again please---'); // eslint-disable-line no-console
 };
 
 //Main functions
@@ -31,7 +38,7 @@ export const streamsProgram = (program) => {
  * @param {string} str (first data for reversing)
  * @return void
  */
-export const reverse = (str) => {
+export const reverse = (str = '') => {
   process.stdin.on('readable', () => {
     const chunk = process.stdin.read();
     if (chunk !== null) {

@@ -9,6 +9,7 @@ import replaceExt from 'replace-ext';
 import request from 'request';
 
 import { WrongPathError } from '../errors/wrong-path-error';
+import { RequestError } from '../errors/request-error';
 
 export const streamsProgram = (program) => {
   program
@@ -41,7 +42,7 @@ const customHelp = () => {
 export const reverse = (str = '') => {
   process.stdin.on('readable', () => {
     const chunk = process.stdin.read();
-    if (chunk !== null) {
+    if (chunk) {
       process.stdout.write(chunk.toString().split('').reverse().join(''));
     }
   });
@@ -59,7 +60,7 @@ export const reverse = (str = '') => {
 export const transform = (str) => {
   process.stdin.on('readable', () => {
     const chunk = process.stdin.read();
-    if (chunk !== null) {
+    if (chunk) {
       process.stdout.write(chunk.toString().toUpperCase());
     }
   });
@@ -78,6 +79,9 @@ export const outputFile = (filePath) => {
   if (isFile(filePath)) {
     fs.createReadStream(filePath)
       .pipe(process.stdout);
+  } else {
+    console.log(`Wrong filePath: ${filePath}`); // eslint-disable-line no-console
+    program.help();
   }
 };
 
@@ -95,6 +99,9 @@ export const convertFromFile = (filePath) => {
       .pipe(parseCSV())
       .pipe(toJSON())
       .pipe(process.stdout);
+  } else {
+    console.log(`Wrong filePath: ${filePath}`); // eslint-disable-line no-console
+    program.help();
   }
 };
 
@@ -113,6 +120,9 @@ export const convertToFile = (filePath) => {
       .pipe(parseCSV())
       .pipe(toJSON())
       .pipe(fs.createWriteStream(replaceExt(filePath, '.json')));
+  } else {
+    console.log(`Wrong filePath: ${filePath}`); // eslint-disable-line no-console
+    program.help();
   }
 };
 
@@ -139,6 +149,9 @@ export const makeCssBundle = (directoryPath) => {
       .pipe(readDirectory(directoryPath))
       .pipe(addDataFromUrl(URL))
       .pipe(fs.createWriteStream(`${directoryPath}${path.sep}${bundleName}`));
+  } else {
+    console.log(`Wrong directoryPath: ${directoryPath}`); // eslint-disable-line no-console
+    program.help();
   }
 };
 
@@ -149,11 +162,7 @@ export const makeCssBundle = (directoryPath) => {
  * @return {boolean}
  */
 const isFile = (filePath) => {
-  if (fs.statSync(filePath).isFile()) {
-    return true;
-  }
-  console.log(`Wrong filePath: ${filePath}`); // eslint-disable-line no-console
-  program.help();
+  return fs.statSync(filePath).isFile();
 };
 
 /**
@@ -162,11 +171,7 @@ const isFile = (filePath) => {
  * @return {boolean}
  */
 const isDirectory = (directoryPath) => {
-  if (fs.statSync(directoryPath).isDirectory()) {
-    return true;
-  }
-  console.log(`Wrong directoryPath: ${directoryPath}`); // eslint-disable-line no-console
-  program.help();
+  return fs.statSync(directoryPath).isDirectory();
 };
 
 /**
@@ -197,13 +202,13 @@ const parseCSV = () => {
  * @return {Stream}
  */
 const toJSON = () => {
-  let objs = [];
+  let objects = [];
   return through.obj(
     (data, enc, cb) => {  //transformFunction - it's equivalent transformStream._transform
-      objs.push(data);
+      objects.push(data);
       cb(null, null);
     }, (cb) => {          //flushFunction  - it's equivalent transformStream._flush
-      cb(null, JSON.stringify(objs));
+      cb(null, JSON.stringify(objects));
     });
 };
 
@@ -248,6 +253,9 @@ const addDataFromUrl = (URL) => {
   return through(
     (data, enc, cb) => {
       request(URL, (error, response, body) => {
+        if (error) {
+          throw new RequestError(`Error with request for URL: ${URL}`);
+        }
         data += body;
         cb(null, data);
       });

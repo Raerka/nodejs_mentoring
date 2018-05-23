@@ -9,7 +9,6 @@ import replaceExt from 'replace-ext';
 import request from 'request';
 
 import { WrongPathError } from '../errors/wrong-path-error';
-import { RequestError } from '../errors/request-error';
 
 export const streamsProgram = (program) => {
   program
@@ -141,14 +140,11 @@ export const convertToFile = (filePath) => {
 export const makeCssBundle = (directoryPath) => {
   if (isDirectory(directoryPath)) {
     const URL = 'https://drive.google.com/uc?export=download&id=1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X';
-    const bundleName = 'bundle.css';
+    const bundleName = `${directoryPath}${path.sep}bundle.css`;
     const rs = new Readable();
     rs.push(null);
-
-    rs
-      .pipe(readDirectory(directoryPath))
-      .pipe(addDataFromUrl(URL))
-      .pipe(fs.createWriteStream(`${directoryPath}${path.sep}${bundleName}`));
+    rs.pipe(readDirectory(directoryPath)).pipe(fs.createWriteStream(bundleName));
+    request(URL).pipe(fs.createWriteStream(bundleName,{ flags: 'a' }));
   } else {
     console.log(`Wrong directoryPath: ${directoryPath}`); // eslint-disable-line no-console
     program.help();
@@ -238,26 +234,6 @@ const readDirectory = (directoryPath) => {
           }
         });
         cb(null, bundleData);
-      });
-    }
-  );
-};
-
-/**
- * @description Create Transform Stream for reading given URL, collecting all data and joining it
- * to the data from the stream which invoke this transformer
- * @param {string} URL  (resource from which need add data)
- * @return {Stream}
- */
-const addDataFromUrl = (URL) => {
-  return through(
-    (data, enc, cb) => {
-      request(URL, (error, response, body) => {
-        if (error) {
-          throw new RequestError(`Error with request for URL: ${URL}`);
-        }
-        data += body;
-        cb(null, data);
       });
     }
   );

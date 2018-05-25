@@ -1,0 +1,14 @@
+/*================= Text-box ====================*/
+
+.text-box {
+  border: 0;
+  height: 35px;
+}
+
+.focus {
+   box-shadow: none;
+}
+
+.disabled {
+   cursor: default;
+}

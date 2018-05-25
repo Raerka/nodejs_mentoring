@@ -1,55 +1,61 @@
-import config from './config';
-import { models } from './models';
-import path from 'path';
+/* eslint-disable indent */
 
-import { DirWatcher } from './modules/dirwatcher';
-import { Importer } from './modules/importer';
-import { WrongPathError } from './errors/wrong-path-error';
-import { ConversionError } from './errors/conversion-error';
+import program from 'commander';
+import {
+  reverse,
+  streamsProgram,
+  outputFile,
+  transform,
+  convertFromFile,
+  convertToFile,
+  makeCssBundle
+} from './utils/streams';
 
-console.log(config.name); // eslint-disable-line no-console
+streamsProgram(program);
 
-new models.User();
-new models.Product();
+program.parse(process.argv);
 
-const dirWatcher = new DirWatcher();
-const importer = new Importer();
-
-const directoryPath = `${__dirname.slice(0, -4)}src${path.sep}data`;
-const delayForWatching = 3000;
-const delayForUnWatch = 50000;
-
-//Log only first member of csv file for short
-try {
-  //async loading
-  dirWatcher.on('changed', (filePath) => {
-    importer
-      .import(filePath)
-      .then((data) => {
-        console.log(data[0]); // eslint-disable-line no-console
-      });
-  });
-  
-  //sync loading
-  dirWatcher.on('changed', (filePath) => {
-    console.log(importer            // eslint-disable-line no-console
-      .importSync(filePath)[0]);
-  });
-  
-  dirWatcher.watch(directoryPath, delayForWatching);
-
-} catch (error) {
-  if (error instanceof WrongPathError) {
-    console.log('Reading path failed', error); // eslint-disable-line no-console
-  } else if (error instanceof ConversionError) {
-    console.log('Conversion of csv file was failed', error); // eslint-disable-line no-console
-  } else {
-    console.log('Unknown error', error); // eslint-disable-line no-console
-    throw error;
-  }
+const NO_COMMAND_SPECIFIED = process.argv.length === 2;
+if (NO_COMMAND_SPECIFIED) {
+  console.log('You have not passed any arguments'); // eslint-disable-line no-console
+  program.help();
 }
 
-setTimeout(() => {
-  dirWatcher.unWatch();
-  console.log('DirWatcher was unwatched'); // eslint-disable-line no-console
-}, delayForUnWatch);
+if (process.argv[2] === '-h' || process.argv[2] === '--help') {
+  program.help();
+}
+
+const checkPath = (filePath) => {
+  if (!filePath) {
+    console.log('You have not passed additional arguments'); // eslint-disable-line no-console
+    program.help();
+  }
+};
+
+switch (program.action) {
+  case 'reverse' :
+    reverse(program.args.join(' '));
+    break;
+  case 'transform' :
+    transform(program.args.join(' '));
+    break;
+  case 'outputFile' :
+    checkPath(program.file);
+    outputFile(program.file);
+    break;
+  case 'convertFromFile' :
+    checkPath(program.file);
+    convertFromFile(program.file);
+    break;
+  case 'convertToFile' :
+    checkPath(program.file);
+    convertToFile(program.file);
+    break;
+  case 'bundle-css' :
+    checkPath(program.path);
+    makeCssBundle(program.path);
+    break;
+  default :
+    console.log('You have not passed any actions'); // eslint-disable-line no-console
+    program.help();
+}

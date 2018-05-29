@@ -7,7 +7,6 @@ const Converter = csv.Converter;
 
 export class Importer {
   constructor() {
-    console.log('Importer module'); // eslint-disable-line no-console
   }
   
   /**

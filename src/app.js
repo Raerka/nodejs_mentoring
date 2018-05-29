@@ -2,39 +2,58 @@
 
 import program from 'commander';
 import {
+  reverse,
   streamsProgram,
-  directFileToLog,
-  transformData,
-  transformCsvFileToJson,
-  transformCsvToJsonAndWriteToFile,
+  outputFile,
+  transform,
+  convertFromFile,
+  convertToFile,
   makeCssBundle
 } from './utils/streams';
 
 streamsProgram(program);
+
 program.parse(process.argv);
 
-//Point 3
 const NO_COMMAND_SPECIFIED = process.argv.length === 2;
 if (NO_COMMAND_SPECIFIED) {
   console.log('You have not passed any arguments'); // eslint-disable-line no-console
   program.help();
 }
 
-switch (program.act) {
-  case 'io' :
-    directFileToLog(program.file); //Point 4
+if (process.argv[2] === '-h' || process.argv[2] === '--help') {
+  program.help();
+}
+
+const checkPath = (filePath) => {
+  if (!filePath) {
+    console.log('You have not passed additional arguments'); // eslint-disable-line no-console
+    program.help();
+  }
+};
+
+switch (program.action) {
+  case 'reverse' :
+    reverse(program.args.join(' '));
     break;
   case 'transform' :
-    transformData(); //Point 5
+    transform(program.args.join(' '));
     break;
-  case 'transform-file' :
-    transformCsvFileToJson(program.file); //Point 6
+  case 'outputFile' :
+    checkPath(program.file);
+    outputFile(program.file);
     break;
-  case 'transform-file-write-to-json' :
-    transformCsvToJsonAndWriteToFile(program.file); //Point 7
+  case 'convertFromFile' :
+    checkPath(program.file);
+    convertFromFile(program.file);
+    break;
+  case 'convertToFile' :
+    checkPath(program.file);
+    convertToFile(program.file);
     break;
   case 'bundle-css' :
-    makeCssBundle(program.path); //Point 8
+    checkPath(program.path);
+    makeCssBundle(program.path);
     break;
   default :
     console.log('You have not passed any actions'); // eslint-disable-line no-console

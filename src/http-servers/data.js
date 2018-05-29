@@ -1,4 +1,4 @@
-const product = {
+export const product = {
   id: 1,
   name: 'Supreme T-Shirt',
   brand: 'Supreme',
@@ -7,4 +7,4 @@ const product = {
     { color: 'blue' },
     { size: 'XL' }
   ]
-}
+};

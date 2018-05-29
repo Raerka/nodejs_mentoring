@@ -1,20 +1,19 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import through from 'through2';
 
 const port = 3000;
 
-const requestHandler = (request, response) => {
-  response.setHeader('Content-Type', 'text/html');
-  //todo Change message!!!
-  fs.createReadStream(`${__dirname}${path.sep}index.html`).pipe(response);
-};
-
-const server = http.createServer(requestHandler);
-
-server.listen(port, (error) => {
+http.createServer((req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  fs.createReadStream(`${__dirname}${path.sep}index.html`)
+    .pipe(through((data, enc, cb) => { cb(null, data.toString().replace('{message}', 'Hello World')); }))
+    .pipe(res);
+}).listen(port, (error) => {
   if (error) {
-    return console.log('something bad happened', error); // eslint-disable-line no-console
+    console.log('something bad happened', error); // eslint-disable-line no-console
+    throw error;
   }
   console.log(`Server is listening on ${port}`); // eslint-disable-line no-console
 });

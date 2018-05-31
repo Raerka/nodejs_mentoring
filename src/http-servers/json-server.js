@@ -4,6 +4,11 @@ import { product } from './data';
 
 const port = 3000;
 
+/**
+ * @description
+ * Set Content-Type header to deal with JSON.
+ * Read data from data.js file and send it as a JSON response.
+ */
 http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   const rs = new Readable();
@@ -12,8 +17,8 @@ http.createServer((req, res) => {
   rs.pipe(res);
 }).listen(port, (error) => {
   if (error) {
-    console.log('something bad happened', error); // eslint-disable-line no-console
+    console.log('Something bad happened', error); // eslint-disable-line no-console
     throw error;
   }
-  console.log(`Server is listening on ${port}`); // eslint-disable-line no-console
+  console.log(`Server is listening on ${port}!`); // eslint-disable-line no-console
 });

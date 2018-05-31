@@ -1,61 +1,80 @@
-/* eslint-disable indent */
+import fs from 'fs';
+import path from 'path';
+import { Readable } from 'stream';
 
-import program from 'commander';
-import {
-  reverse,
-  streamsProgram,
-  outputFile,
-  transform,
-  convertFromFile,
-  convertToFile,
-  makeCssBundle
-} from './utils/streams';
+import express from 'express';
+import bodyParser from 'body-parser';
+import { cookieParser } from './middlewares/cookie-parser';
+import { queryParser } from './middlewares/query-parser';
 
-streamsProgram(program);
+import * as products from './data/products.json';
+import * as users from './data/users.json';
 
-program.parse(process.argv);
+export const app = express();
 
-const NO_COMMAND_SPECIFIED = process.argv.length === 2;
-if (NO_COMMAND_SPECIFIED) {
-  console.log('You have not passed any arguments'); // eslint-disable-line no-console
-  program.help();
-}
+app.use(cookieParser);
+app.use(queryParser);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-if (process.argv[2] === '-h' || process.argv[2] === '--help') {
-  program.help();
-}
+//  / GET Return 'Hello World!' string
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
-const checkPath = (filePath) => {
-  if (!filePath) {
-    console.log('You have not passed additional arguments'); // eslint-disable-line no-console
-    program.help();
+//  /api/products GET Return ALL products
+//  /api/products POST Add NEW product and return it
+app.route('/api/products')
+  .get((req, res) => {
+    delete products.default;
+    res.send(products);
+  })
+  .post((req, res) => {
+    const productsObj = JSON.parse(JSON.stringify(products));
+    const product = JSON.parse(JSON.stringify(req.body));
+    if (!product.id || productsObj[product.id]) {
+      return res.send(`Product with id = ${product.id} already exist or something wrong. Please check your data and request`);
+    }
+    productsObj[product.id] = product;
+    delete productsObj.default;
+    
+    const rs = new Readable();
+    rs.push(JSON.stringify(productsObj, null, 2));
+    rs.push(null);
+    rs.pipe(fs.createWriteStream(`${__dirname}${path.sep}data${path.sep}products.json`));
+    res.send(product);
+  });
+
+//   /api/products/:id GET Return SINGLE product
+app.get('/api/products/:id', (req, res) => {
+  for (let key in products) {
+    if (!products.hasOwnProperty(key)) {
+      continue;
+    }
+    if (req.params.id === products[key].id) {
+      res.json(products[key]);
+      return;
+    }
   }
-};
+  res.send(`Product with id = ${req.params.id} is not found.`);
+});
 
-switch (program.action) {
-  case 'reverse' :
-    reverse(program.args.join(' '));
-    break;
-  case 'transform' :
-    transform(program.args.join(' '));
-    break;
-  case 'outputFile' :
-    checkPath(program.file);
-    outputFile(program.file);
-    break;
-  case 'convertFromFile' :
-    checkPath(program.file);
-    convertFromFile(program.file);
-    break;
-  case 'convertToFile' :
-    checkPath(program.file);
-    convertToFile(program.file);
-    break;
-  case 'bundle-css' :
-    checkPath(program.path);
-    makeCssBundle(program.path);
-    break;
-  default :
-    console.log('You have not passed any actions'); // eslint-disable-line no-console
-    program.help();
-}
+//  /api/products/:id/reviews GET Return ALL reviews for a single product
+app.get('/api/products/:id/reviews', (req, res) => {
+  for (let key in products) {
+    if (!products.hasOwnProperty(key)) {
+      continue;
+    }
+    if (req.params.id === products[key].id && products[key].reviews) {
+      res.json(products[key].reviews);
+      return;
+    }
+  }
+  res.send(`Review for product with id = ${req.params.id} is not found.`);
+});
+
+//   /api/users GET Return ALL users
+app.get('/api/users', (req, res) => {
+  delete users.default;
+  res.json(users);
+});

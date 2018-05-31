@@ -5,6 +5,12 @@ import through from 'through2';
 
 const port = 3000;
 
+/**
+ * @description
+ * Simple html server.
+ * Set Content-Type header to html.
+ * Send modified html file as a response.
+ */
 http.createServer((req, res) => {
   res.setHeader('Content-Type', 'text/html');
   fs.createReadStream(`${__dirname}${path.sep}index.html`)
@@ -15,5 +21,5 @@ http.createServer((req, res) => {
     console.log('something bad happened', error); // eslint-disable-line no-console
     throw error;
   }
-  console.log(`Server is listening on ${port}`); // eslint-disable-line no-console
+  console.log(`Server is listening on ${port}!`); // eslint-disable-line no-console
 });

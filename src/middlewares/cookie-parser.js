@@ -10,7 +10,7 @@
  */
 export const cookieParser = (req, res, next) => {
   if (!req.headers.cookie) {
-    req.parsedCookies = 'Have no any cookies, sorry';
+    req.parsedCookies = {};
     return next();
   }
   const cookies = req.headers.cookie.split('; ');

@@ -7,8 +7,8 @@ import bodyParser from 'body-parser';
 import { cookieParser } from './middlewares/cookie-parser';
 import { queryParser } from './middlewares/query-parser';
 
-import * as products from './data/products.json';
-import * as users from './data/users.json';
+import products from './data/products.json';
+import users from './data/users.json';
 
 export const app = express();
 
@@ -26,7 +26,6 @@ app.get('/', (req, res) => {
 //  /api/products POST Add NEW product and return it
 app.route('/api/products')
   .get((req, res) => {
-    delete products.default;
     res.send(products);
   })
   .post((req, res) => {
@@ -36,7 +35,6 @@ app.route('/api/products')
       return res.send(`Product with id = ${product.id} already exist or something wrong. Please check your data and request`);
     }
     productsObj[product.id] = product;
-    delete productsObj.default;
     
     const rs = new Readable();
     rs.push(JSON.stringify(productsObj, null, 2));
@@ -47,34 +45,31 @@ app.route('/api/products')
 
 //   /api/products/:id GET Return SINGLE product
 app.get('/api/products/:id', (req, res) => {
-  for (let key in products) {
-    if (!products.hasOwnProperty(key)) {
-      continue;
-    }
+  let product = null;
+  Object.keys(products).forEach(key => {
     if (req.params.id === products[key].id) {
-      res.json(products[key]);
-      return;
+      product = products[key];
     }
-  }
-  res.send(`Product with id = ${req.params.id} is not found.`);
+  });
+  product
+    ? res.send(product)
+    : res.send(`Product with id = ${req.params.id} is not found.`);
 });
 
 //  /api/products/:id/reviews GET Return ALL reviews for a single product
 app.get('/api/products/:id/reviews', (req, res) => {
-  for (let key in products) {
-    if (!products.hasOwnProperty(key)) {
-      continue;
-    }
+  let review = null;
+  Object.keys(products).forEach(key => {
     if (req.params.id === products[key].id && products[key].reviews) {
-      res.json(products[key].reviews);
-      return;
+      review = products[key].reviews;
     }
-  }
-  res.send(`Review for product with id = ${req.params.id} is not found.`);
+  });
+  review
+    ? res.send(review)
+    : res.send(`Review for product with id = ${req.params.id} is not found.`);
 });
 
 //   /api/users GET Return ALL users
 app.get('/api/users', (req, res) => {
-  delete users.default;
   res.json(users);
 });

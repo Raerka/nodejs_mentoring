@@ -16,8 +16,8 @@
   "scripts": {
     "build": "babel src --out-dir dist --copy-files",
     "prestart": "rimraf dist && npm run build",
-    "start": "node dist/app.js",
-    "watch": "nodemon --exec babel-node src/app.js",
+    "start": "node dist/index.js",
+    "watch": "nodemon --exec babel-node src/index.js",
     "lint": "eslint src",
     "test": "test"
   },
@@ -30,8 +30,10 @@
     "nodemon": "1.17.3"
   },
   "dependencies": {
+    "body-parser": "1.18.3",
     "commander": "2.15.1",
     "csvtojson": "1.1.9",
+    "express": "4.16.3",
     "replace-ext": "1.0.0",
     "request": "2.85.0",
     "split": "1.0.1",

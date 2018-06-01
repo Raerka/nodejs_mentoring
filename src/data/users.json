@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Вася",
+    "age": "35",
+    "isAdmin": "false"
+  },
+  {
+    "name": "Петя",
+    "age": "28",
+    "isAdmin": "false"
+  },
+  {
+    "name": "Саша",
+    "age": "25",
+    "isAdmin": "true"
+  }
+]

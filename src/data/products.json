@@ -1,0 +1,100 @@
+{
+  "0": {
+    "id": "0",
+    "name": "Supreme T-Shirt",
+    "brand": "Supreme",
+    "price": "99.99",
+    "reviews": [
+      {
+        "color": "blue"
+      },
+      {
+        "size": "XL"
+      }
+    ]
+  },
+  "1": {
+    "id": "1",
+    "name": "Simple T-Shirt",
+    "brand": "Simple",
+    "price": "32.99",
+    "reviews": [
+      {
+        "color": "red"
+      },
+      {
+        "size": "L"
+      }
+    ]
+  },
+  "2": {
+    "id": "2",
+    "name": "Super T-Shirt",
+    "brand": "Super",
+    "price": "199.99",
+    "reviews": [
+      {
+        "color": "gold"
+      },
+      {
+        "size": "XXL"
+      }
+    ]
+  },
+  "4": {
+    "id": "4",
+    "name": "Simple T-Shirt",
+    "brand": "Simple",
+    "price": "32.99",
+    "reviews": [
+      {
+        "color": "red"
+      },
+      {
+        "size": "L"
+      }
+    ]
+  },
+  "45": {
+    "id": "45",
+    "name": "Simple T-Shirt",
+    "brand": "Simple",
+    "price": "32.99",
+    "reviews": [
+      {
+        "color": "red"
+      },
+      {
+        "size": "L"
+      }
+    ]
+  },
+  "4r5": {
+    "id": "4r5",
+    "name": "Simple T-Shirt",
+    "brand": "Simple",
+    "price": "32.99",
+    "reviews": [
+      {
+        "color": "red"
+      },
+      {
+        "size": "L"
+      }
+    ]
+  },
+  "2ed": {
+    "id": "2ed",
+    "name": "Simple T-Shirt",
+    "brand": "Simple",
+    "price": "32.99",
+    "reviews": [
+      {
+        "color": "red"
+      },
+      {
+        "size": "L"
+      }
+    ]
+  }
+}

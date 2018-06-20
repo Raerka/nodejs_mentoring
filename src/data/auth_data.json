@@ -1,0 +1,25 @@
+[
+  {
+    "login": "test",
+    "password": "1234"
+  },
+  {
+    "login": "Andrei",
+    "password": "qwerty",
+    "test": "facebook"
+  },
+  {
+    "login": "Andrei Kasmykou",
+    "password": "12345",
+    "test": "twitter"
+  },
+  {
+    "login": "Андрей Космыков",
+    "password": "12345",
+    "test": "google"
+  }
+  
+  
+  
+  
+]

@@ -1,0 +1,33 @@
+import jwt from 'jsonwebtoken';
+/**
+ * @description
+ * Middleware for cookie parsing in request.
+ * Parse Cookie header and populate `req.parsedCookies`
+ * with an object keyed and value by the cookie data.
+ *
+ * @param {Request} req
+ * @param {http.ServerResponse} res
+ * @param {Function} next
+ */
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @return {*}
+ */
+export const checkToken = (req, res, next) => {
+  const token = req.headers['x-access-token'];
+  
+  if (token) {
+    jwt.verify(token, 'secretKey', (err) => {
+      if (err) {
+        res.json({success: false, message: 'Failed to authenticate token.'});
+      } else {
+        next();
+      }
+    });
+  } else {
+    res.status(403). send({success: false, message: 'No token provided'});
+  }
+};

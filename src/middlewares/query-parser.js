@@ -1,4 +1,5 @@
 import url from 'url';
+
 /**
  * @description
  * Middleware for query parsing in request.

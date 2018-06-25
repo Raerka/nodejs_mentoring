@@ -4,7 +4,7 @@ import { Strategy as TwitterStrategy } from 'passport-twitter';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 
 import authData from '../data/auth_data.json';
-import {config} from './config';
+import {config} from './auth_config';
 
 export const configurePassport = (passport) => {
   passport.serializeUser((user, done) => {

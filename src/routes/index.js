@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import { Readable } from 'stream';
-
 import jwt from 'jsonwebtoken';
 import { checkToken } from '../middlewares/check-token';
 
-import products from '../data/products.json';
-import users from '../data/users.json';
 import authData from '../data/auth_data.json';
+
+import db from '../models';
+
+const User = db.users;
+const Product = db.products;
+const Review = db.reviews;
 
 export const configureRoutes = (app, passport) => {
   
@@ -25,52 +25,65 @@ export const configureRoutes = (app, passport) => {
   //  /api/products -  Add new product and return it
   app.route('/api/products')
     .get(checkToken, (req, res) => {
-      res.send(products);
+      Product.findAll()
+        .then(products => {
+          res.send(products);
+        });
     })
+
     .post(checkToken, (req, res) => {
-      const productsObj = JSON.parse(JSON.stringify(products));
       const product = JSON.parse(JSON.stringify(req.body));
-      if (!product.id || productsObj[product.id]) {
-        return res.send(`Product with id = ${product.id} already exist or something wrong. Please check your data and request`);
-      }
-      productsObj[product.id] = product;
-      
-      const rs = new Readable();
-      rs.push(JSON.stringify(productsObj, null, 2));
-      rs.push(null);
-      rs.pipe(fs.createWriteStream(`${__dirname}${path.sep}data${path.sep}products.json`));
-      res.send(product);
+      Product.create({
+        name: product.name,
+        brand: product.brand,
+        price: product.price,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+        .then(addedProduct => {
+          Review.create({
+            productId: addedProduct.id,
+            color: product.reviews[0].color,
+            size: product.reviews[1].size,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        })
+        .then(() => {
+          res.send(product);
+        })
+        .catch(err => {
+          console.log('Something went wrong');  // eslint-disable-line no-console
+          throw err;
+        });
     });
 
   //   /api/products/:id - Return single product by current id
   app.get('/api/products/:id', checkToken, (req, res) => {
-    let product = null;
-    Object.keys(products).forEach(key => {
-      if (req.params.id === products[key].id) {
-        product = products[key];
-      }
-    });
-    product
-      ? res.send(product)
-      : res.send(`Product with id = ${req.params.id} is not found.`);
+    Product.findById(req.params.id)
+      .then(product => {
+        product
+          ? res.send(product)
+          : res.send(`Product with id = ${req.params.id} is not found.`);
+      });
   });
 
   //  /api/products/:id/reviews - Return all reviews for a single product by id
   app.get('/api/products/:id/reviews', checkToken, (req, res) => {
-    let review = null;
-    Object.keys(products).forEach(key => {
-      if (req.params.id === products[key].id && products[key].reviews) {
-        review = products[key].reviews;
-      }
-    });
-    review
-      ? res.send(review)
-      : res.send(`Review for product with id = ${req.params.id} is not found.`);
+    Review.findOne({ where: {productId: req.params.id}})
+      .then(review => {
+        review
+          ? res.send(review)
+          : res.send(`Review for product with id = ${req.params.id} is not found.`);
+      });
   });
 
   //   /api/users - Return all users
   app.get('/api/users', checkToken, (req, res) => {
-    res.json(users);
+    User.findAll()
+      .then(users => {
+        res.json(users);
+      });
   });
 
   //  /auth - Simple authentication by login and password with generating access token.

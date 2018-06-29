@@ -11,6 +11,11 @@ const Review = db.reviews;
 
 export const configureRoutes = (app, passport) => {
   
+  
+  /**
+   *   -----------General Routes-----------
+   */
+  
   //  / - Return 'Hello World!'. Always shows when user is authorised.
   app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -20,10 +25,16 @@ export const configureRoutes = (app, passport) => {
   app.get('/fail', (req, res) => {
     res.send('You are not authorised');
   });
-
-  //  /api/products -  Return all products
-  //  /api/products -  Add new product and return it
+  
+  
+  /**
+   *   -----------Product's Routes-----------
+   */
+  
+  //  /api/products - GET -  Return all products
+  //  /api/products - POST - Add new product and return it
   app.route('/api/products')
+    
     .get(checkToken, (req, res) => {
       Product.findAll()
         .then(products => {
@@ -58,15 +69,22 @@ export const configureRoutes = (app, passport) => {
         });
     });
 
-  //   /api/products/:id - Return single product by current id
-  app.get('/api/products/:id', checkToken, (req, res) => {
-    Product.findById(req.params.id)
-      .then(product => {
-        product
-          ? res.send(product)
-          : res.send(`Product with id = ${req.params.id} is not found.`);
-      });
-  });
+  //   /api/products/:id - GET - Return single product by current id
+  //   /api/products/:id - DELETE - Delete single product by current id
+  app.route('/api/products/:id')
+    
+    .get(checkToken, (req, res) => {
+      Product.findById(req.params.id)
+        .then(product => {
+          product
+            ? res.send(product)
+            : res.send(`Product with id = ${req.params.id} is not found.`);
+        });
+    })
+    
+    .delete(checkToken, (req, res) => {
+      res.send('Product was deleted!');
+    });
 
   //  /api/products/:id/reviews - Return all reviews for a single product by id
   app.get('/api/products/:id/reviews', checkToken, (req, res) => {
@@ -77,6 +95,11 @@ export const configureRoutes = (app, passport) => {
           : res.send(`Review for product with id = ${req.params.id} is not found.`);
       });
   });
+  
+  
+  /**
+   *   -----------User's Routes-----------
+   */
 
   //   /api/users - Return all users
   app.get('/api/users', checkToken, (req, res) => {
@@ -85,6 +108,46 @@ export const configureRoutes = (app, passport) => {
         res.json(users);
       });
   });
+  
+  //   /api/users/:id - Delete single user from database
+  app.delete('/api/users/:id', checkToken, (req, res) => {
+    res.send('User was deleted!');
+  });
+
+  
+  /**
+   *   -----------City's Routes-----------
+   */
+  
+  
+  //   /api/cities - GET - Return all cities
+  //   /api/cities - POST - Add new city and return it
+  app.route('/api/cities')
+  
+    .get(checkToken, (req, res) => {
+      res.send('Return all cities!');
+    })
+  
+    .post(checkToken, (req, res) => {
+      res.send('New city was added!');
+    });
+  
+  //   /api/cities/:id - PUT - Update single product by current id
+  //   /api/cities/:id - DELETE - Delete single city by current id
+  app.route('/api/cities/:id')
+    
+    .put(checkToken, (req, res) => {
+      res.send('City was updated!');
+    })
+    
+    .delete(checkToken, (req, res) => {
+      res.send('Product was deleted!');
+    });
+  
+  
+  /**
+   *   -----------Authenticate's Routes-----------
+   */
 
   //  /auth - Simple authentication by login and password with generating access token.
   app.post('/auth', (req, res) => {
@@ -115,9 +178,14 @@ export const configureRoutes = (app, passport) => {
       });
   });
   
-  // -----Passport-----
+  
+  /**
+   *   -----------Passport-----------
+   */
 
-  // -----LocalStrategy-----
+  /**
+   *   -----------Local Strategy-----------
+   */
 
   //  /local-auth - Authentication by login and password with passport.js.
   app.post('/local-auth',
@@ -130,8 +198,11 @@ export const configureRoutes = (app, passport) => {
     }
   );
   
-  // -----Facebook Strategy-----
-
+  
+  /**
+   *   -----------Facebook Strategy-----------
+   */
+  
   //  /auth/facebook - Authentication by facebook Strategy.
   app.get('/auth/facebook',
     passport.authenticate('facebook', {
@@ -147,7 +218,10 @@ export const configureRoutes = (app, passport) => {
     })
   );
   
-  // -----Twitter Strategy-----
+  
+  /**
+   *   -----------Twitter Strategy-----------
+   */
   
   //  /auth/twitter - Authentication by twitter Strategy.
   app.get('/auth/twitter', passport.authenticate('twitter'));
@@ -160,8 +234,11 @@ export const configureRoutes = (app, passport) => {
     })
   );
   
-  // -----Google Strategy-----
   
+  /**
+   *   -----------Google Strategy-----------
+   */
+
   //  /auth/google - Authentication by google Strategy.
   app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
   

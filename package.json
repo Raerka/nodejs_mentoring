@@ -16,8 +16,8 @@
   "scripts": {
     "build": "babel src --out-dir dist --copy-files",
     "prestart": "rimraf dist && npm run build",
-    "start": "node dist/index.js",
-    "watch": "nodemon --exec babel-node src/index.js",
+    "start": "node dist/mongodb/index.js",
+    "watch": "nodemon --exec babel-node src/mongodb/index.js",
     "lint": "eslint src",
     "test": "test"
   },
@@ -36,6 +36,7 @@
     "express": "4.16.3",
     "express-session": "1.15.6",
     "jsonwebtoken": "8.3.0",
+    "mongoose": "^5.1.7",
     "passport": "0.4.0",
     "passport-facebook": "2.1.1",
     "passport-google-oauth": "1.0.0",

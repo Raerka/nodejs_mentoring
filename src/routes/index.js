@@ -1,16 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { checkToken } from '../middlewares/check-token';
+
+import { User } from '../models/users';
+import { Product } from '../models/products';
+import { City } from '../models/cities';
 
 import authData from '../data/auth_data.json';
 
-import db from '../models';
-
-const User = db.users;
-const Product = db.products;
-const Review = db.reviews;
-
 export const configureRoutes = (app, passport) => {
-  
   
   /**
    *   -----------General Routes-----------
@@ -34,65 +30,60 @@ export const configureRoutes = (app, passport) => {
   //  /api/products - GET -  Return all products
   //  /api/products - POST - Add new product and return it
   app.route('/api/products')
-    
-    .get(checkToken, (req, res) => {
-      Product.findAll()
-        .then(products => {
-          res.send(products);
+    .get((req, res) => {
+      Product.find()
+        .then(products => res.json(products))
+        .catch(err => {
+          res.send('Something went wrong. You can not get Products');
+          throw err;
         });
     })
-
-    .post(checkToken, (req, res) => {
-      const product = JSON.parse(JSON.stringify(req.body));
-      Product.create({
-        name: product.name,
-        brand: product.brand,
-        price: product.price,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-        .then(addedProduct => {
-          Review.create({
-            productId: addedProduct.id,
-            color: product.reviews[0].color,
-            size: product.reviews[1].size,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
-        })
-        .then(() => {
-          res.send(product);
-        })
+    .post((req, res) => {
+      const product = new Product(req.body);
+    
+      product.save()
+        .then(product => res.json(product))
         .catch(err => {
-          console.log('Something went wrong');  // eslint-disable-line no-console
+          res.send('Something went wrong. You can not add new product');
           throw err;
         });
     });
-
+    
   //   /api/products/:id - GET - Return single product by current id
   //   /api/products/:id - DELETE - Delete single product by current id
   app.route('/api/products/:id')
-    
-    .get(checkToken, (req, res) => {
+    .get((req, res) => {
       Product.findById(req.params.id)
         .then(product => {
           product
             ? res.send(product)
             : res.send(`Product with id = ${req.params.id} is not found.`);
+        })
+        .catch(err => {
+          res.send(`Product with id = ${req.params.id} is not found.`);
+          throw err;
         });
     })
-    
-    .delete(checkToken, (req, res) => {
-      res.send('Product was deleted!');
+    .delete((req, res) => {
+      Product.findByIdAndRemove(req.params.id)
+        .then(product => res.send(`Product ${product} was deleted`))
+        .catch(err => {
+          res.send(`Product with id = ${req.params.id} is not found.`);
+          throw err;
+        });
     });
 
   //  /api/products/:id/reviews - Return all reviews for a single product by id
-  app.get('/api/products/:id/reviews', checkToken, (req, res) => {
-    Review.findOne({ where: {productId: req.params.id}})
-      .then(review => {
-        review
-          ? res.send(review)
+  app.get('/api/products/:id/reviews', (req, res) => {
+    Product.findById(req.params.id)
+      .then(product => {
+        product
+          ? res.send(product.reviews)
           : res.send(`Review for product with id = ${req.params.id} is not found.`);
+      })
+      .catch(err => {
+        res.send(`Review for product with id = ${req.params.id} is not found.`);
+        throw err;
       });
   });
   
@@ -102,16 +93,23 @@ export const configureRoutes = (app, passport) => {
    */
 
   //   /api/users - Return all users
-  app.get('/api/users', checkToken, (req, res) => {
-    User.findAll()
-      .then(users => {
-        res.json(users);
+  app.get('/api/users', (req, res) => {
+    User.find()
+      .then(users => res.json(users))
+      .catch(err => {
+        res.send('Something went wrong. You can not get Users');
+        throw err;
       });
   });
   
   //   /api/users/:id - Delete single user from database
-  app.delete('/api/users/:id', checkToken, (req, res) => {
-    res.send('User was deleted!');
+  app.delete('/api/users/:id', (req, res) => {
+    User.findByIdAndRemove(req.params.id)
+      .then(user => res.send(`User ${user} was deleted`))
+      .catch(err => {
+        res.send(`User with id = ${req.params.id} is not found.`);
+        throw err;
+      });
   });
 
   
@@ -123,25 +121,51 @@ export const configureRoutes = (app, passport) => {
   //   /api/cities - GET - Return all cities
   //   /api/cities - POST - Add new city and return it
   app.route('/api/cities')
-  
-    .get(checkToken, (req, res) => {
-      res.send('Return all cities!');
+    .get((req, res) => {
+      City.find()
+        .then(cities => res.json(cities))
+        .catch(err => {
+          res.send('Something went wrong. You can not get Cities');
+          throw err;
+        });
     })
   
-    .post(checkToken, (req, res) => {
-      res.send('New city was added!');
+    .post((req, res) => {
+      const city = new City(req.body);
+      
+      city.save()
+        .then(city => res.json(city))
+        .catch(err => {
+          res.send('Something went wrong. You can not add new city');
+          throw err;
+        });
     });
   
-  //   /api/cities/:id - PUT - Update single product by current id
+  //   /api/cities/:id - PUT - Update single product by current id if exists
+  //                           or adds new city with the given id otherwise
+  
   //   /api/cities/:id - DELETE - Delete single city by current id
   app.route('/api/cities/:id')
-    
-    .put(checkToken, (req, res) => {
-      res.send('City was updated!');
+    .put((req, res) => {
+      City.findByIdAndUpdate(req.params.id, req.body,{ upsert: true })
+        .then(city => {
+          city
+            ? res.send(`City ${city} was updated with new data ${JSON.stringify(req.body)}`)
+            : res.send(`City ${JSON.stringify(req.body)} was added to database`);
+        })
+        .catch(err => {
+          res.send(`Can't update City with id = ${req.params.id} by data ${JSON.stringify(req.body)}.
+          Please, check your request`);
+          throw err;
+        });
     })
-    
-    .delete(checkToken, (req, res) => {
-      res.send('Product was deleted!');
+    .delete((req, res) => {
+      City.findByIdAndRemove(req.params.id)
+        .then(city => res.send(`User ${city} was deleted`))
+        .catch(err => {
+          res.send(`City with id = ${req.params.id} is not found.`);
+          throw err;
+        });
     });
   
   

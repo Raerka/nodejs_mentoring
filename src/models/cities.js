@@ -1,97 +1,75 @@
 import mongoose from 'mongoose';
+import cities from '../data/cities.json';
 
 const Schema = mongoose.Schema;
+
+/**
+ * @description Validate country, it can be only Belarus or Russia
+ *
+ * @param {string} value
+ * @return {boolean}
+ */
+const  countryValidator = (value) => {
+  return value === 'Belarus' || value === 'Russia';
+};
 
 /**
  * City Schema
  */
 const CitySchema = new Schema({
-  name: { type: String, required: true, default: '' },
-  country: { type: String, required: true, default: '' },
-  capital: { type: Boolean, required: true },
+  name: {
+    type: String,
+    required: true
+  },
+  country: {
+    type: String,
+    validate: {
+      validator: countryValidator,
+      msg: 'Please check your `{PATH}`. It has to be Moscow or Belarus. Your value is `{VALUE}`'} },
+  capital: {
+    type: Boolean,
+    required: true
+  },
   location: {
-    lat: {type: Number, required: true},
-    long: {type: Number, required: true}
+    lat: {
+      type: Number,
+      required: true
+    },
+    long: {
+      type: Number,
+      required: true
+    }
+  },
+  lastModifiedDate: {
+    type: Date,
+    required: false
   }
 });
 
 /**
- * Methods
+ * @description
+ * Add extra field called lastModifiedDate with the current date for every created/updated item
+ * (every PUT and POST request for all city entities)
+ *
  */
-CitySchema.methods = {
-/*
-  /!**
-   * Authenticate - check if the passwords are the same
-   *
-   * @param {String} plainText
-   * @return {Boolean}
-   * @api public
-   *!/
-  
-  authenticate: function (plainText) {
-    return this.encryptPassword(plainText) === this.hashed_password;
-  },
-  
-  /!**
-   * Make salt
-   *
-   * @return {String}
-   * @api public
-   *!/
-  
-  makeSalt: function () {
-    return Math.round((new Date().valueOf() * Math.random())) + '';
-  },
-  
-  /!**
-   * Encrypt password
-   *
-   * @param {String} password
-   * @return {String}
-   * @api public
-   *!/
-  
-  encryptPassword: function (password) {
-    if (!password) return '';
-    try {
-      return crypto
-        .createHmac('sha1', this.salt)
-        .update(password)
-        .digest('hex');
-    } catch (err) {
-      return '';
-    }
-  },
-  
-  /!**
-   * Validation is not required if using OAuth
-   *!/
-  
-  skipValidation: function () {
-    return ~oAuthTypes.indexOf(this.provider);
-  }
-};
-
-/!**
- * Statics
- *!/
-
-UserSchema.statics = {
-  
-  /!**
-   * Load
-   *
-   * @param {Object} options
-   * @param {Function} cb
-   * @api private
-   *!/
-  
-  load: function (options, cb) {
-    options.select = options.select || 'name username';
-    return this.findOne(options.criteria)
-      .select(options.select)
-      .exec(cb);
-  }*/
-};
+CitySchema.pre('save', function(next) {
+  this.lastModifiedDate = new Date();
+  next();
+});
 
 export const City = mongoose.model('City', CitySchema);
+
+/**
+ * @description
+ * Populating collection from json file
+ * It is enough to run it once, before working with database
+ *
+ */
+cities.forEach(city => {
+  new City(city).save((error) => {
+    if (error) {
+      console.log(`Saving city ${city} is failed`);  // eslint-disable-line no-console
+      throw error;
+    }
+  });
+});

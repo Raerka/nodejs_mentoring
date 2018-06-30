@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import products from '../data/products.json';
 
 const Schema = mongoose.Schema;
 
@@ -6,92 +7,58 @@ const Schema = mongoose.Schema;
  * Product Schema
  */
 const ProductSchema = new Schema({
-  name: { type: String, required: true, default: '' },
-  brand: { type: String, required: true, default: '' },
-  price: { type: Number, required: true },
+  name: {
+    type: String,
+    required: true
+  },
+  brand: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
   reviews: {
-    color: {type: String, required: true},
-    size: {type: String, required: true}
+    color: {
+      type: String,
+      required: true
+    },
+    size: {
+      type: String,
+      required: true
+    }
+  },
+  lastModifiedDate: {
+    type: Date,
+    required: false
   }
 });
 
 /**
- * Methods
+ * @description
+ * Add extra field called lastModifiedDate with the current date for every created/updated item
+ * (every PUT and POST request for all product entities)
+ *
  */
-ProductSchema.methods = {
-  /*
-    /!**
-     * Authenticate - check if the passwords are the same
-     *
-     * @param {String} plainText
-     * @return {Boolean}
-     * @api public
-     *!/
-    
-    authenticate: function (plainText) {
-      return this.encryptPassword(plainText) === this.hashed_password;
-    },
-    
-    /!**
-     * Make salt
-     *
-     * @return {String}
-     * @api public
-     *!/
-    
-    makeSalt: function () {
-      return Math.round((new Date().valueOf() * Math.random())) + '';
-    },
-    
-    /!**
-     * Encrypt password
-     *
-     * @param {String} password
-     * @return {String}
-     * @api public
-     *!/
-    
-    encryptPassword: function (password) {
-      if (!password) return '';
-      try {
-        return crypto
-          .createHmac('sha1', this.salt)
-          .update(password)
-          .digest('hex');
-      } catch (err) {
-        return '';
-      }
-    },
-    
-    /!**
-     * Validation is not required if using OAuth
-     *!/
-    
-    skipValidation: function () {
-      return ~oAuthTypes.indexOf(this.provider);
-    }
-  };
-  
-  /!**
-   * Statics
-   *!/
-  
-  UserSchema.statics = {
-    
-    /!**
-     * Load
-     *
-     * @param {Object} options
-     * @param {Function} cb
-     * @api private
-     *!/
-    
-    load: function (options, cb) {
-      options.select = options.select || 'name username';
-      return this.findOne(options.criteria)
-        .select(options.select)
-        .exec(cb);
-    }*/
-};
+ProductSchema.pre('save', function(next) {
+  this.lastModifiedDate = new Date();
+  next();
+});
 
 export const Product = mongoose.model('Product', ProductSchema);
+
+/**
+ * @description
+ * Populating collection from json file
+ * It is enough to run it once, before working with database
+ *
+ */
+products.forEach(product => {
+  new Product(product).save((error) => {
+    if (error) {
+      console.log(`Saving product ${product} is failed`);  // eslint-disable-line no-console
+      throw error;
+    }
+  });
+});

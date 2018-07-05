@@ -22,7 +22,6 @@ export const configureRoutes = (app, passport) => {
     res.send('You are not authorised');
   });
   
-  
   /**
    *   -----------Product's Routes-----------
    */
@@ -34,8 +33,8 @@ export const configureRoutes = (app, passport) => {
       Product.find()
         .then(products => res.json(products))
         .catch(err => {
-          res.send('Something went wrong. You can not get Products');
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not get Products');
         });
     })
     .post((req, res) => {
@@ -44,8 +43,8 @@ export const configureRoutes = (app, passport) => {
       product.save()
         .then(product => res.json(product))
         .catch(err => {
-          res.send('Something went wrong. You can not add new product');
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not add new product');
         });
     });
     
@@ -60,16 +59,16 @@ export const configureRoutes = (app, passport) => {
             : res.send(`Product with id = ${req.params.id} is not found.`);
         })
         .catch(err => {
-          res.send(`Product with id = ${req.params.id} is not found.`);
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Product with id = ${req.params.id} is not found.`);
         });
     })
     .delete((req, res) => {
       Product.findByIdAndRemove(req.params.id)
         .then(product => res.send(`Product ${product} was deleted`))
         .catch(err => {
-          res.send(`Product with id = ${req.params.id} is not found.`);
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Product with id = ${req.params.id} is not found.`);
         });
     });
 
@@ -82,8 +81,8 @@ export const configureRoutes = (app, passport) => {
           : res.send(`Review for product with id = ${req.params.id} is not found.`);
       })
       .catch(err => {
-        res.send(`Review for product with id = ${req.params.id} is not found.`);
-        throw err;
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send(`Review for product with id = ${req.params.id} is not found.`);
       });
   });
   
@@ -97,8 +96,8 @@ export const configureRoutes = (app, passport) => {
     User.find()
       .then(users => res.json(users))
       .catch(err => {
-        res.send('Something went wrong. You can not get Users');
-        throw err;
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send('Something went wrong. You can not get Users');
       });
   });
   
@@ -107,8 +106,8 @@ export const configureRoutes = (app, passport) => {
     User.findByIdAndRemove(req.params.id)
       .then(user => res.send(`User ${user} was deleted`))
       .catch(err => {
-        res.send(`User with id = ${req.params.id} is not found.`);
-        throw err;
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send(`User with id = ${req.params.id} is not found.`);
       });
   });
 
@@ -125,8 +124,8 @@ export const configureRoutes = (app, passport) => {
       City.find()
         .then(cities => res.json(cities))
         .catch(err => {
-          res.send('Something went wrong. You can not get Cities');
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not get Cities');
         });
     })
   
@@ -136,8 +135,8 @@ export const configureRoutes = (app, passport) => {
       city.save()
         .then(city => res.json(city))
         .catch(err => {
-          res.send('Something went wrong. You can not add new city');
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not add new city');
         });
     });
   
@@ -154,17 +153,17 @@ export const configureRoutes = (app, passport) => {
             : res.send(`City ${JSON.stringify(req.body)} was added to database`);
         })
         .catch(err => {
-          res.send(`Can't update City with id = ${req.params.id} by data ${JSON.stringify(req.body)}.
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Can't update City with id = ${req.params.id} by data ${JSON.stringify(req.body)}.
           Please, check your request`);
-          throw err;
         });
     })
     .delete((req, res) => {
       City.findByIdAndRemove(req.params.id)
         .then(city => res.send(`User ${city} was deleted`))
         .catch(err => {
-          res.send(`City with id = ${req.params.id} is not found.`);
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`City with id = ${req.params.id} is not found.`);
         });
     });
   

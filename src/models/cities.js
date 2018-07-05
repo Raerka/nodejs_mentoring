@@ -9,9 +9,7 @@ const Schema = mongoose.Schema;
  * @param {string} value
  * @return {boolean}
  */
-const  countryValidator = (value) => {
-  return value === 'Belarus' || value === 'Russia';
-};
+const  countryValidator = value => value === 'Belarus' || value === 'Russia';
 
 /**
  * City Schema
@@ -41,8 +39,7 @@ const CitySchema = new Schema({
     }
   },
   lastModifiedDate: {
-    type: Date,
-    required: false
+    type: Date
   }
 });
 

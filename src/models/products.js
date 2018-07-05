@@ -30,8 +30,7 @@ const ProductSchema = new Schema({
     }
   },
   lastModifiedDate: {
-    type: Date,
-    required: false
+    type: Date
   }
 });
 

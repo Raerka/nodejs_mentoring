@@ -21,7 +21,6 @@ const UserSchema = new Schema({
   },
   lastModifiedDate: {
     type: Date,
-    required: false
   }
 });
 

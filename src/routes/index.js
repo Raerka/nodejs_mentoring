@@ -1,15 +1,16 @@
 import jwt from 'jsonwebtoken';
-import { checkToken } from '../middlewares/check-token';
+
+import { User } from '../models/users';
+import { Product } from '../models/products';
+import { City } from '../models/cities';
 
 import authData from '../data/auth_data.json';
 
-import db from '../models';
-
-const User = db.users;
-const Product = db.products;
-const Review = db.reviews;
-
 export const configureRoutes = (app, passport) => {
+  
+  /**
+   *   -----------General Routes-----------
+   */
   
   //  / - Return 'Hello World!'. Always shows when user is authorised.
   app.get('/', (req, res) => {
@@ -20,71 +21,156 @@ export const configureRoutes = (app, passport) => {
   app.get('/fail', (req, res) => {
     res.send('You are not authorised');
   });
-
-  //  /api/products -  Return all products
-  //  /api/products -  Add new product and return it
+  
+  /**
+   *   -----------Product's Routes-----------
+   */
+  
+  //  /api/products - GET -  Return all products
+  //  /api/products - POST - Add new product and return it
   app.route('/api/products')
-    .get(checkToken, (req, res) => {
-      Product.findAll()
-        .then(products => {
-          res.send(products);
+    .get((req, res) => {
+      Product.find()
+        .then(products => res.json(products))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not get Products');
         });
     })
-
-    .post(checkToken, (req, res) => {
-      const product = JSON.parse(JSON.stringify(req.body));
-      Product.create({
-        name: product.name,
-        brand: product.brand,
-        price: product.price,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-        .then(addedProduct => {
-          Review.create({
-            productId: addedProduct.id,
-            color: product.reviews[0].color,
-            size: product.reviews[1].size,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
-        })
-        .then(() => {
-          res.send(product);
+    .post((req, res) => {
+      const product = new Product(req.body);
+    
+      product.save()
+        .then(product => res.json(product))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not add new product');
+        });
+    });
+    
+  //   /api/products/:id - GET - Return single product by current id
+  //   /api/products/:id - DELETE - Delete single product by current id
+  app.route('/api/products/:id')
+    .get((req, res) => {
+      Product.findById(req.params.id)
+        .then(product => {
+          product
+            ? res.send(product)
+            : res.send(`Product with id = ${req.params.id} is not found.`);
         })
         .catch(err => {
-          console.log('Something went wrong');  // eslint-disable-line no-console
-          throw err;
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Product with id = ${req.params.id} is not found.`);
+        });
+    })
+    .delete((req, res) => {
+      Product.findByIdAndRemove(req.params.id)
+        .then(product => res.send(`Product ${product} was deleted`))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Product with id = ${req.params.id} is not found.`);
         });
     });
 
-  //   /api/products/:id - Return single product by current id
-  app.get('/api/products/:id', checkToken, (req, res) => {
+  //  /api/products/:id/reviews - Return all reviews for a single product by id
+  app.get('/api/products/:id/reviews', (req, res) => {
     Product.findById(req.params.id)
       .then(product => {
         product
-          ? res.send(product)
-          : res.send(`Product with id = ${req.params.id} is not found.`);
-      });
-  });
-
-  //  /api/products/:id/reviews - Return all reviews for a single product by id
-  app.get('/api/products/:id/reviews', checkToken, (req, res) => {
-    Review.findOne({ where: {productId: req.params.id}})
-      .then(review => {
-        review
-          ? res.send(review)
+          ? res.send(product.reviews)
           : res.send(`Review for product with id = ${req.params.id} is not found.`);
+      })
+      .catch(err => {
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send(`Review for product with id = ${req.params.id} is not found.`);
       });
   });
+  
+  
+  /**
+   *   -----------User's Routes-----------
+   */
 
   //   /api/users - Return all users
-  app.get('/api/users', checkToken, (req, res) => {
-    User.findAll()
-      .then(users => {
-        res.json(users);
+  app.get('/api/users', (req, res) => {
+    User.find()
+      .then(users => res.json(users))
+      .catch(err => {
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send('Something went wrong. You can not get Users');
       });
   });
+  
+  //   /api/users/:id - Delete single user from database
+  app.delete('/api/users/:id', (req, res) => {
+    User.findByIdAndRemove(req.params.id)
+      .then(user => res.send(`User ${user} was deleted`))
+      .catch(err => {
+        console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+        res.status(500).send(`User with id = ${req.params.id} is not found.`);
+      });
+  });
+
+  
+  /**
+   *   -----------City's Routes-----------
+   */
+  
+  
+  //   /api/cities - GET - Return all cities
+  //   /api/cities - POST - Add new city and return it
+  app.route('/api/cities')
+    .get((req, res) => {
+      City.find()
+        .then(cities => res.json(cities))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not get Cities');
+        });
+    })
+  
+    .post((req, res) => {
+      const city = new City(req.body);
+      
+      city.save()
+        .then(city => res.json(city))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send('Something went wrong. You can not add new city');
+        });
+    });
+  
+  //   /api/cities/:id - PUT - Update single product by current id if exists
+  //                           or adds new city with the given id otherwise
+  
+  //   /api/cities/:id - DELETE - Delete single city by current id
+  app.route('/api/cities/:id')
+    .put((req, res) => {
+      City.findByIdAndUpdate(req.params.id, req.body,{ upsert: true })
+        .then(city => {
+          city
+            ? res.send(`City ${city} was updated with new data ${JSON.stringify(req.body)}`)
+            : res.send(`City ${JSON.stringify(req.body)} was added to database`);
+        })
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`Can't update City with id = ${req.params.id} by data ${JSON.stringify(req.body)}.
+          Please, check your request`);
+        });
+    })
+    .delete((req, res) => {
+      City.findByIdAndRemove(req.params.id)
+        .then(city => res.send(`User ${city} was deleted`))
+        .catch(err => {
+          console.error(`Error with database. Stack: ${err.stack}. Message: ${err.message}`); // eslint-disable-line no-console
+          res.status(500).send(`City with id = ${req.params.id} is not found.`);
+        });
+    });
+  
+  
+  /**
+   *   -----------Authenticate's Routes-----------
+   */
 
   //  /auth - Simple authentication by login and password with generating access token.
   app.post('/auth', (req, res) => {
@@ -115,9 +201,14 @@ export const configureRoutes = (app, passport) => {
       });
   });
   
-  // -----Passport-----
+  
+  /**
+   *   -----------Passport-----------
+   */
 
-  // -----LocalStrategy-----
+  /**
+   *   -----------Local Strategy-----------
+   */
 
   //  /local-auth - Authentication by login and password with passport.js.
   app.post('/local-auth',
@@ -130,8 +221,11 @@ export const configureRoutes = (app, passport) => {
     }
   );
   
-  // -----Facebook Strategy-----
-
+  
+  /**
+   *   -----------Facebook Strategy-----------
+   */
+  
   //  /auth/facebook - Authentication by facebook Strategy.
   app.get('/auth/facebook',
     passport.authenticate('facebook', {
@@ -147,7 +241,10 @@ export const configureRoutes = (app, passport) => {
     })
   );
   
-  // -----Twitter Strategy-----
+  
+  /**
+   *   -----------Twitter Strategy-----------
+   */
   
   //  /auth/twitter - Authentication by twitter Strategy.
   app.get('/auth/twitter', passport.authenticate('twitter'));
@@ -160,8 +257,11 @@ export const configureRoutes = (app, passport) => {
     })
   );
   
-  // -----Google Strategy-----
   
+  /**
+   *   -----------Google Strategy-----------
+   */
+
   //  /auth/google - Authentication by google Strategy.
   app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
   

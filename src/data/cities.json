@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Brest",
+    "country": "Belarus",
+    "capital": "false",
+    "location": {
+      "lat": "52.097621",
+      "long": "23.734050"
+    }
+  },
+  {
+    "name": "Gomel",
+    "country": "Belarus",
+    "capital": "false",
+    "location": {
+      "lat": "32.097621",
+      "long": "48.734050"
+    }
+  },
+  {
+    "name": "Minsk",
+    "country": "Belarus",
+    "capital": "true",
+    "location": {
+      "lat": "231.097621",
+      "long": "134.734050"
+    }
+  },
+  {
+    "name": "Moscow",
+    "country": "Russia",
+    "capital": "true",
+    "location": {
+      "lat": "122.097621",
+      "long": "268.756050"
+    }
+  },
+  {
+    "name": "Saint Petersburg",
+    "country": "Russia",
+    "capital": "false",
+    "location": {
+      "lat": "462.257621",
+      "long": "523.734590"
+    }
+  }
+]

@@ -1,8 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-
 import passport from 'passport';
+import swaggerUi from 'swagger-ui-express';
+
+import swaggerDocument from './swagger/swagger.json';
 
 import { cookieParser } from './middlewares/cookie-parser';
 import { queryParser } from './middlewares/query-parser';
@@ -27,5 +29,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 configureRoutes(app, passport);

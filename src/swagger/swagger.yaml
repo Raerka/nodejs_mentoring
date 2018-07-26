@@ -1,0 +1,548 @@
+swagger: '2.0'
+info:
+  description: This is a simple API for Node.js Mentoring Program
+  version: "1.0.1"
+  title: Simple API for Node.js Mentoring Program
+  # contact info for development or API team
+  contact:
+    email: andrei_kasmykou@epam.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing routes
+tags:
+- name: auth
+  description: the authentication entry point for working with application
+- name: general
+  description: supply request/response for general cases
+- name: products
+  description: the main entry point for working with products, secure with authentication
+- name: users
+  description: the main entry point for working with users, secure with authentication
+- name: cities
+  description: the main entry point for working with cities, secure with authentication
+
+paths:
+# geneal routes
+  /:
+    get:
+      tags:
+        - general
+      summary: shows Hello World! when user is authorised
+      operationId: helloWorld
+      description: shows Hello World! when user is authorised
+      produces: 
+        - string answer
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+      responses:
+        200:
+          description: Hello World! 
+          schema:
+            $ref: '#/definitions/HelloWorld'
+        401:
+          description: not authorized
+        403:
+          description: no token provided
+          
+  /fail:
+    get:
+      tags:
+        - general
+      summary: shows You are not authorised, when user is not authorised
+      operationId: notAuthorized
+      description: used for redirection 
+      produces: 
+        - string answer
+      responses:
+        200:
+          description: you are not authorised 
+          schema:
+            $ref: '#/definitions/NotAuthorized'
+
+# autheticate route
+  /auth:
+    post:
+      tags:
+        - auth
+      summary: authenticate user and get token
+      operationId: authUser
+      description: authenticate user and get token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user data
+          description: user data for authenticate
+          schema:
+            $ref: '#/definitions/UserDataForAuthenticate'
+      responses:
+        200:
+          description: successful authentication
+          schema:
+            $ref: '#/definitions/AuthenticateResponse'
+        403:
+          description: not registered
+
+# products routes  
+  /api/products:
+    get:
+      tags:
+        - products
+      summary: search and return all existing products
+      operationId: allPrducts
+      description: return all existing products from database
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+      responses:
+        200:
+          description: return all existing products from database
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'  
+        401:
+          description: not authorized
+        403:
+          description: no token provided    
+        500:
+          description: you can not get products
+    
+    post:
+      tags:
+        - products
+      summary: add new product and return it
+      operationId: addProduct
+      description: add product to the database
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: body
+          name: product item
+          description: product item for adding
+          schema:
+            $ref: '#/definitions/Product'
+      responses:
+        201:
+          description: product created
+        400:
+          description: invalid input, product item invalid
+        409:
+          description: added product item already exists in database
+        500:
+          description: you can not add new product
+
+  /api/products/{productId}:
+    get:
+      tags:
+        - products
+      summary: search current product by id and return it
+      operationId: searchProductById
+      description: search current product by id and return it
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: productId
+          description:  productId
+          type: string
+          required: true
+      responses:
+        200:
+          description: search product with current id
+          schema:
+            $ref: '#/definitions/Product'
+        400:
+          description: bad input parameter
+        404:
+          description: product with such id was not found
+          
+    delete:
+      tags:
+        - products
+      summary: delete current product by id and return string answer
+      operationId: deleteProduct
+      description: delete current product by id and return string answer
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: productId
+          description: productId
+          type: string
+          required: true
+      responses:
+        204:
+          description: product was deleted
+        404:
+          description: product with such id was not found
+          
+  /api/products/{productId}/reviews:
+    get:
+      tags:
+        - products
+      summary: return product's reviews by current productId
+      operationId: getReviewsByProductId
+      description: return product's reviews by current productId
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: productId
+          description: productId
+          type: string
+          required: true
+      responses:
+        200:
+          description: search product's review by current productId
+          schema:
+            $ref: '#/definitions/Review'
+        400:
+          description: bad input parameter
+        404:
+          description: product's review by such productId was not found
+
+# users routes
+  /api/users:
+    get:
+      tags:
+        - users
+      summary: search and return all existing users
+      operationId: allUsers
+      description: return all existing users from database
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+      responses:
+        200:
+          description: return all existing products from database 
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        401:
+          description: not authorized
+        403:
+          description: no token provided    
+        500:
+          description: you can not get users
+            
+  /api/users/{userId}:
+    delete:
+      tags:
+        - users
+      summary: delete current user by id and return string answer
+      operationId: deleteUser
+      description: delete current user by id and return string answer
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: userId
+          description: userId
+          type: string
+          required: true
+      responses:
+        204:
+          description: User was deleted
+        404:
+          description: User with such id was not found
+
+# cities routes
+  /api/cities:
+    get:
+      tags:
+        - cities
+      summary: search and return all existing cities
+      operationId: allCities
+      description: return all existing cities from database
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+      responses:
+        200:
+          description: return all existing cities from database 
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/City'
+        401:
+          description: not authorized
+        403:
+          description: no token provided    
+        500:
+          description: you can not get cities
+          
+    post:
+      tags:
+        - cities
+      summary: add new city and return it
+      operationId: addCity
+      description: add city to the database
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: x-access-token
+        type: string
+        required: true
+      - in: body
+        name: city item
+        description: city item for addng
+        schema:
+          $ref: '#/definitions/City'
+      responses:
+        201:
+          description: city created
+        400:
+          description: invalid input, city item invalid
+        409:
+          description: added city item already exists in database
+        500:
+          description: you can not add new product
+
+  /api/cities/{cityId}:
+    put:
+      tags:
+        - cities
+      summary: create or update city item
+      operationId: editCity
+      description: create new city item or update if it exist
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: cityId
+          description: cityId
+          type: string
+          required: true
+        - in: body
+          name: cityItem
+          description: City item to edit
+          schema:
+            $ref: '#/definitions/City'
+      responses:
+        200:
+          description: city item was updated
+        201:
+          description: city item was created
+        304:
+          description: city item was not updated
+        400:
+          description: invalid input, city item invalid
+       
+    delete:
+      tags:
+        - cities
+      summary: delete current city by id and return string answer
+      operationId: deleteCity
+      description: delete current city by id and return string answer
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: path
+          name: cityId
+          description: cityId
+          type: string
+          required: true
+      responses:
+        204:
+          description: City was deleted
+        404:
+          description: City with such id was not found
+
+# scheme definitions
+definitions:
+
+  HelloWorld:
+      type: string
+      example: Hello World!
+
+  NotAuthorized:
+      type: string
+      example: You are not authorized
+  
+  UserDataForAuthenticate:
+    type: object
+    required: 
+      - login
+      - password
+    properties:
+      login:
+        type: string
+        example: test
+      password:
+        type: string
+        example: 1234
+
+  AuthenticateResponse:
+    type: object
+    properties:
+      code:
+        type: number
+        example: 200
+      message:
+        type: string
+        example: OK
+      data:
+        type: object
+        properties:
+          user:
+            type: object
+            properties:
+              email:
+                type: string
+                example: email
+              username:
+                type: string
+                example: test
+      token:
+        type: string
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MzI1MjQ1MzgsImV4cCI6MTUzMjUyNDYzOH0.bbvY8TosExirH2_sttEWe7kdMCGWY2TwKobMb9Eu2g4
+
+  Product:
+    type: object
+    required: 
+    - _id
+    properties:
+      _id:
+        type: string
+        example: 5b364ca66dcb884d9c2f6fff
+      name:
+        type: string
+        example: Supreme T-Shirt
+      brand:
+        type: string
+        example: Supreme
+      price:
+        type: number
+        example: 99.99
+      lastModifiedDate:
+        type: string
+        example: 2018-06-29T15:13:42.504Z
+      reviews:
+        $ref: '#/definitions/Review'
+          
+  Review:
+    type: object
+    properties:
+      color:
+        type: string
+        example: blue
+      size:
+        type: string
+        example: XL    
+      
+  User:
+    type: object
+    required: 
+      - _id
+    properties:
+      _id:
+        type: string
+        example: 5b364ca66dcb884d9c2f6fff
+      name:
+        type: string
+        example: Петя
+      age:
+        type: number
+        example: 28
+      isAdmin:
+        type: boolean
+        example: true
+      lastModifiedDate:
+        type: string
+        example: 2018-06-29T15:13:42.504Z
+  
+  City:
+    type: object
+    required: 
+      - _id
+    properties:
+      _id:
+        type: string
+        example: 5b364ca66dcb884d9c2f6fff
+      name:
+        type: string
+        example: Minsk
+      country:
+        type: string
+        example: Belarus
+      capital:
+        type: boolean
+        example: true
+      location:
+        $ref: '#/definitions/Location'
+      lastModifiedDate:
+        type: string
+        example: 2018-06-29T15:13:42.504Z
+
+  Location:
+    type: object
+    properties:
+      lat:
+        type: number
+        example: 32.097621
+      long:
+        type: number
+        example: 48.73405
+
+  # Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /Kasmykou/node_js_mentoring/1.0.0
+schemes:
+ - https

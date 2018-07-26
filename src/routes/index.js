@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
+import authData from '../data/auth_data.json';
 
 import { User } from '../models/users';
 import { Product } from '../models/products';
 import { City } from '../models/cities';
-
-import authData from '../data/auth_data.json';
 
 export const configureRoutes = (app, passport) => {
   
